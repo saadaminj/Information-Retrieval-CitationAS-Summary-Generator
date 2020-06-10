@@ -1,0 +1,74 @@
+Lucene[6] to index and retrieve dataset.
+during indexing files, also saved citation sentences, and their structure information (such as cited count, position of sentence in original article and paragraph)
+for obtaining citation sentences associated with (or relevant to) input term, and scoring the citation sentences, we used built-in algorithms of Lucene. 
+finally our software ranks results which will be used for next step of clustering.
+
+
+first we apply Vector Space Model to represent citation sentences
+and then used TF-IDF to calculate feature weights. 
+in VSM, citation sentences are equivalent to documents and expressed as : 
+Sj : jth citation sentence 
+Ti : ith feature item (word)
+Wij : weight of Ti in the jth Sentence or (Sj)
+Sj  =  Sj  (  T1 , W1j  ;  T2 , W2j  ......;  Ti , Wij  ....;  Tm , Wmj )
+.
+1<= j <= N ;  N is the no. of citation sentences
+1<= i <= M ; M is the no. of feature items (words)
+.
+Wij = tfij * idfi ( log(N/ni + 0.01) )
+tfij : frequency of ti in sentence sj
+ni  : the number of sentences in which ti is located
+
+
+STC (Suffic tree clustering ) Algorithm : is based on generalized suffix tree -> recognises key words and phrases that occured more than once in citation sentences 
+these words acts as one base clusters. 
+there can be many same citation sentences in different clusters, whereas cluster labels are different.
+so we merge these base clusters to form final clusters to reduce overlap of citation sentences.
+
+
+similarity computation based on wordNet :
+wordnet is a semantic dictionary in which words are organised in a classification tree.
+semantic similarity between words can be calculated by the path in the tree.
+
+
+1. tf-idf based sentences extraction :
+each citation sentence is represented by the term-document matrix. 
+we compute sentence weight for the sentence = s = s (t1,w1 ; ti,wi, ... tm,wm)
+and weight is computed by 
+w(s) = sum ( i=1 to m ) (wi / m)
+wi = ith word in a sentence S
+m = no. of words in a sentence S
+then citation sentences are ranked based on their weight.
+the sentences with higher weight will be used as summary sentences.
+
+
+Working :
+1) user enters query (usually two to three terms, keywords)
+2) pylucene to get dataset and extract citation sentences associated with input terms
+3) apply vector space model, distinct terms on i, citation sentences on j. calculate Wij (tf.i,j-idf.i) idf = log( N / ( ni + 0.01 ) )  
+4) apply STC algorithm on Citation Sentences extracted on step 2. (extracts keywords and form clusters)
+5) Generate cluster labels (by selecting K terms from each cluster having highest tf-idf weight)
+6) Apply Wordnet to analyze similarity among cluster labels. merge semantic similar clusters
+7) Now, sum each citation sentence vector and take top 3 citation sentence from each cluster
+
+
+
+
+
+
+Working :
+1) user enters query (usually two to three terms, keywords)
+2) pylucene to get dataset and extract citation sentences associated with input terms
+3) apply vector space model, distinct terms on i, citation sentences on j. calculate Wij (tf.i,j-idf.i) idf = log( N / ( ni + 0.01 ) )  
+4) apply STC algorithm on Citation Sentences extracted on step 2. (extracts keywords and form clusters)
+5) Generate cluster labels (by selecting K terms from each cluster having highest tf-idf weight)
+6) Apply Wordnet to analyze similarity among cluster labels. merge semantic similar clusters
+7) Now, sum each citation sentence vector and take top 3 citation sentence from each cluster
+
+Wordnet link: (function call after "Using the code") https://www.codeproject.com/Articles/11835/WordNet-based-semantic-similarity-measurement
+
+STC Link: https://github.com/dinidininta/Semantic-Suffix-Tree-Clustering
+
+Pylucene on python 2.7 Link: https://graus.nu/blog/pylucene-4-0-in-60-seconds-tutorial/
+
+VSM Link: (indexing function need to be changed) : https://github.com/saadaminj/vector-space-model/blob/master/VSM.ipynb
